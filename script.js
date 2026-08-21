@@ -1,47 +1,43 @@
 /* =========================================================
-   MD. NAIM HOSSEN PORTFOLIO
-   MAIN JAVASCRIPT
-   ========================================================= */
-
-
-/* =========================================================
    MOBILE MENU
-   ========================================================= */
+========================================================= */
 
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
+const toggle = document.querySelector(".menu-toggle");
+const links = document.querySelector(".nav-links");
 
-if (menuToggle && navLinks) {
+if (toggle && links) {
 
-  menuToggle.addEventListener("click", () => {
+  toggle.addEventListener("click", () => {
 
-    const isOpen =
-      navLinks.classList.toggle("open");
+    const open =
+      links.classList.toggle("open");
 
-    menuToggle.setAttribute(
+    toggle.setAttribute(
       "aria-expanded",
-      isOpen
+      open
     );
 
-    menuToggle.textContent =
-      isOpen ? "×" : "☰";
+    toggle.textContent =
+      open ? "✕" : "☰";
+
   });
 
 
   document
     .querySelectorAll(".nav-links a")
-    .forEach(link => {
+    .forEach((link) => {
 
       link.addEventListener("click", () => {
 
-        navLinks.classList.remove("open");
+        links.classList.remove("open");
 
-        menuToggle.setAttribute(
+        toggle.setAttribute(
           "aria-expanded",
           "false"
         );
 
-        menuToggle.textContent = "☰";
+        toggle.textContent = "☰";
+
       });
 
     });
@@ -49,230 +45,162 @@ if (menuToggle && navLinks) {
 }
 
 
+
 /* =========================================================
-   DARK MODE
-   ========================================================= */
+   YEAR
+========================================================= */
 
-const themeToggle =
-  document.getElementById("themeToggle");
+const year =
+  document.getElementById("year");
 
-const themeIcon =
-  document.getElementById("themeIcon");
+if (year) {
 
-
-/*
-   Load saved theme.
-   If the visitor previously selected dark mode,
-   keep dark mode after refreshing.
-*/
-
-const savedTheme =
-  localStorage.getItem("naim-theme");
-
-
-if (savedTheme === "dark") {
-
-  document.body.classList.add("dark");
-
-  if (themeIcon) {
-    themeIcon.textContent = "☀";
-  }
+  year.textContent =
+    new Date().getFullYear();
 
 }
 
 
-/* Toggle */
-
-if (themeToggle) {
-
-  themeToggle.addEventListener("click", () => {
-
-    document.body.classList.toggle("dark");
-
-    const isDark =
-      document.body.classList.contains("dark");
-
-
-    localStorage.setItem(
-      "naim-theme",
-      isDark ? "dark" : "light"
-    );
-
-
-    if (themeIcon) {
-
-      themeIcon.textContent =
-        isDark ? "☀" : "☾";
-
-    }
-
-  });
-
-}
-
 
 /* =========================================================
-   IMAGE SLIDER
-   ========================================================= */
+   PROFESSIONAL IMAGE SLIDER
+=========================================================
 
+   Gallery images:
 
-/*
-   IMAGE SLIDER SETTINGS
+   1. naim-2.png
+   2. naim-3.png
+   3. naim-4.png
+   4. naim-5.png
 
-   Change this number if you want the images
-   to stay longer.
+   naim-1.png is NOT part of this slider.
 
-   7000 = 7 seconds
-   8000 = 8 seconds
-   10000 = 10 seconds
-
-   I have set it to 7 seconds.
-*/
-
-const SLIDE_TIME = 7000;
+========================================================= */
 
 
 const slides =
-  document.querySelectorAll(".slide");
+  document.querySelectorAll(
+    ".portfolio-slide"
+  );
 
-const slider =
-  document.getElementById("imageSlider");
+const dots =
+  document.querySelectorAll(
+    ".slider-dot"
+  );
+
+const previousButton =
+  document.querySelector(
+    ".slider-prev"
+  );
 
 const nextButton =
-  document.getElementById("nextSlide");
+  document.querySelector(
+    ".slider-next"
+  );
 
-const prevButton =
-  document.getElementById("prevSlide");
+const currentSlide =
+  document.getElementById(
+    "current-slide"
+  );
 
-const dotsContainer =
-  document.getElementById("sliderDots");
-
-const currentSlideText =
-  document.getElementById("currentSlide");
-
-const totalSlidesText =
-  document.getElementById("totalSlides");
+const totalSlides =
+  document.getElementById(
+    "total-slides"
+  );
 
 
 let currentIndex = 0;
 
-let slideTimer;
+
+/*
+  Change this number if you want
+  the images to stay longer.
+
+  7000 = 7 seconds
+  8000 = 8 seconds
+  10000 = 10 seconds
+*/
+
+const slideDuration = 8000;
+
+let sliderTimer;
 
 
-/* =========================================================
-   CREATE DOTS
-   ========================================================= */
-
-if (slides.length > 0 && dotsContainer) {
-
-  slides.forEach((slide, index) => {
-
-    const dot =
-      document.createElement("button");
-
-    dot.className = "slider-dot";
-
-    dot.setAttribute(
-      "aria-label",
-      `Go to image ${index + 1}`
-    );
-
-
-    dot.addEventListener("click", () => {
-
-      showSlide(index);
-
-      restartSlider();
-
-    });
-
-
-    dotsContainer.appendChild(dot);
-
-  });
-
-}
-
-
-const dots =
-  document.querySelectorAll(".slider-dot");
-
-
-/* =========================================================
-   SHOW SLIDE
-   ========================================================= */
 
 function showSlide(index) {
 
-  if (slides.length === 0) {
+  if (!slides.length) {
     return;
   }
 
 
   /*
-     Loop around automatically.
+    Keep index inside the
+    available slide range.
   */
 
   if (index >= slides.length) {
 
-    index = 0;
+    currentIndex = 0;
+
+  } else if (index < 0) {
+
+    currentIndex =
+      slides.length - 1;
+
+  } else {
+
+    currentIndex = index;
 
   }
 
-  if (index < 0) {
-
-    index = slides.length - 1;
-
-  }
 
 
-  currentIndex = index;
+  /* Hide all slides */
 
-
-  /* Remove active */
-
-  slides.forEach(slide => {
+  slides.forEach((slide) => {
 
     slide.classList.remove("active");
 
   });
 
 
-  dots.forEach(dot => {
 
-    dot.classList.remove("active");
-
-  });
-
-
-  /* Activate selected */
+  /* Activate selected slide */
 
   slides[currentIndex]
     .classList.add("active");
 
 
-  if (dots[currentIndex]) {
 
-    dots[currentIndex]
-      .classList.add("active");
+  /* Update dots */
 
-  }
+  dots.forEach((dot, index) => {
+
+    dot.classList.toggle(
+      "active",
+      index === currentIndex
+    );
+
+  });
 
 
-  /* Counter */
 
-  if (currentSlideText) {
+  /* Update counter */
 
-    currentSlideText.textContent =
+  if (currentSlide) {
+
+    currentSlide.textContent =
       String(currentIndex + 1)
         .padStart(2, "0");
 
   }
 
 
-  if (totalSlidesText) {
 
-    totalSlidesText.textContent =
+  if (totalSlides) {
+
+    totalSlides.textContent =
       String(slides.length)
         .padStart(2, "0");
 
@@ -281,122 +209,157 @@ function showSlide(index) {
 }
 
 
+
 /* =========================================================
    NEXT
-   ========================================================= */
+========================================================= */
 
 function nextSlide() {
 
-  showSlide(currentIndex + 1);
+  showSlide(
+    currentIndex + 1
+  );
+
+  restartSlider();
 
 }
+
 
 
 /* =========================================================
    PREVIOUS
-   ========================================================= */
+========================================================= */
 
 function previousSlide() {
 
-  showSlide(currentIndex - 1);
+  showSlide(
+    currentIndex - 1
+  );
+
+  restartSlider();
 
 }
 
 
+
 /* =========================================================
    BUTTON EVENTS
-   ========================================================= */
+========================================================= */
 
 if (nextButton) {
 
   nextButton.addEventListener(
     "click",
-    () => {
-
-      nextSlide();
-
-      restartSlider();
-
-    }
+    nextSlide
   );
 
 }
 
 
-if (prevButton) {
+if (previousButton) {
 
-  prevButton.addEventListener(
+  previousButton.addEventListener(
     "click",
-    () => {
-
-      previousSlide();
-
-      restartSlider();
-
-    }
+    previousSlide
   );
 
 }
+
 
 
 /* =========================================================
-   AUTOMATIC SLIDER
-   ========================================================= */
+   DOT EVENTS
+========================================================= */
+
+dots.forEach((dot, index) => {
+
+  dot.addEventListener(
+    "click",
+    () => {
+
+      showSlide(index);
+
+      restartSlider();
+
+    }
+  );
+
+});
+
+
+
+/* =========================================================
+   AUTO SLIDER
+========================================================= */
 
 function startSlider() {
 
-  /*
-     7 seconds per image.
-  */
-
-  slideTimer =
-    setInterval(
-      nextSlide,
-      SLIDE_TIME
-    );
-
-}
+  if (slides.length <= 1) {
+    return;
+  }
 
 
-function stopSlider() {
+  sliderTimer =
+    setInterval(() => {
 
-  clearInterval(slideTimer);
+      showSlide(
+        currentIndex + 1
+      );
+
+    }, slideDuration);
 
 }
+
 
 
 function restartSlider() {
 
-  stopSlider();
+  clearInterval(sliderTimer);
 
   startSlider();
 
 }
 
 
+
 /* =========================================================
-   PAUSE WHEN MOUSE IS OVER IMAGE
-   ========================================================= */
+   PAUSE WHEN MOUSE IS OVER SLIDER
+========================================================= */
+
+const slider =
+  document.querySelector(
+    ".portfolio-slider"
+  );
+
 
 if (slider) {
 
   slider.addEventListener(
     "mouseenter",
-    stopSlider
+    () => {
+
+      clearInterval(sliderTimer);
+
+    }
   );
 
 
   slider.addEventListener(
     "mouseleave",
-    startSlider
+    () => {
+
+      startSlider();
+
+    }
   );
 
 }
 
 
+
 /* =========================================================
    TOUCH / SWIPE SUPPORT
-   ========================================================= */
+========================================================= */
 
 let touchStartX = 0;
 
@@ -405,9 +368,10 @@ let touchEndX = 0;
 
 if (slider) {
 
+
   slider.addEventListener(
     "touchstart",
-    event => {
+    (event) => {
 
       touchStartX =
         event.changedTouches[0].screenX;
@@ -419,11 +383,10 @@ if (slider) {
 
   slider.addEventListener(
     "touchend",
-    event => {
+    (event) => {
 
       touchEndX =
         event.changedTouches[0].screenX;
-
 
       handleSwipe();
 
@@ -436,23 +399,20 @@ if (slider) {
 
 function handleSwipe() {
 
-  const distance =
+  const difference =
     touchStartX - touchEndX;
 
 
   /*
-     Swipe left = next
-     Swipe right = previous
+    Ignore very small movements.
   */
 
-  if (Math.abs(distance) < 50) {
-
+  if (Math.abs(difference) < 50) {
     return;
-
   }
 
 
-  if (distance > 0) {
+  if (difference > 0) {
 
     nextSlide();
 
@@ -462,38 +422,46 @@ function handleSwipe() {
 
   }
 
-
-  restartSlider();
-
 }
+
 
 
 /* =========================================================
    KEYBOARD SUPPORT
-   ========================================================= */
+========================================================= */
 
 document.addEventListener(
   "keydown",
-  event => {
+  (event) => {
+
+    /*
+      Don't interfere with typing
+      inside form fields.
+    */
+
+    const tag =
+      document.activeElement?.tagName;
 
     if (
-      event.key === "ArrowRight"
+      tag === "INPUT" ||
+      tag === "TEXTAREA"
     ) {
 
-      nextSlide();
-
-      restartSlider();
+      return;
 
     }
 
 
-    if (
-      event.key === "ArrowLeft"
-    ) {
+    if (event.key === "ArrowRight") {
+
+      nextSlide();
+
+    }
+
+
+    if (event.key === "ArrowLeft") {
 
       previousSlide();
-
-      restartSlider();
 
     }
 
@@ -501,29 +469,11 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   INITIALIZE SLIDER
-   ========================================================= */
-
-if (slides.length > 0) {
-
-  showSlide(0);
-
-  startSlider();
-
-}
-
 
 /* =========================================================
-   CURRENT YEAR
-   ========================================================= */
+   START SLIDER
+========================================================= */
 
-const year =
-  document.getElementById("year");
+showSlide(0);
 
-if (year) {
-
-  year.textContent =
-    new Date().getFullYear();
-
-}
+startSlider();
