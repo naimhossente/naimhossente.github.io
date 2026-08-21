@@ -1,186 +1,413 @@
-/* ========================================
-   MOBILE NAVIGATION
-   ======================================== */
+/* =========================================================
+   MD. NAIM HOSSEN PORTFOLIO
+   MAIN JAVASCRIPT
+   ========================================================= */
 
-const toggle = document.querySelector(".menu-toggle");
-const links = document.querySelector(".nav-links");
 
-if (toggle && links) {
-  toggle.addEventListener("click", () => {
-    const open = links.classList.toggle("open");
-    toggle.setAttribute("aria-expanded", open);
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
+
+const menuToggle = document.getElementById("menuToggle");
+const navLinks = document.getElementById("navLinks");
+
+if (menuToggle && navLinks) {
+
+  menuToggle.addEventListener("click", () => {
+
+    const isOpen =
+      navLinks.classList.toggle("open");
+
+    menuToggle.setAttribute(
+      "aria-expanded",
+      isOpen
+    );
+
+    menuToggle.textContent =
+      isOpen ? "×" : "☰";
   });
+
+
+  document
+    .querySelectorAll(".nav-links a")
+    .forEach(link => {
+
+      link.addEventListener("click", () => {
+
+        navLinks.classList.remove("open");
+
+        menuToggle.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+        menuToggle.textContent = "☰";
+      });
+
+    });
+
 }
 
-document.querySelectorAll(".nav-links a").forEach((a) => {
-  a.addEventListener("click", () => {
-    if (links) {
-      links.classList.remove("open");
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+const themeToggle =
+  document.getElementById("themeToggle");
+
+const themeIcon =
+  document.getElementById("themeIcon");
+
+
+/*
+   Load saved theme.
+   If the visitor previously selected dark mode,
+   keep dark mode after refreshing.
+*/
+
+const savedTheme =
+  localStorage.getItem("naim-theme");
+
+
+if (savedTheme === "dark") {
+
+  document.body.classList.add("dark");
+
+  if (themeIcon) {
+    themeIcon.textContent = "☀";
+  }
+
+}
+
+
+/* Toggle */
+
+if (themeToggle) {
+
+  themeToggle.addEventListener("click", () => {
+
+    document.body.classList.toggle("dark");
+
+    const isDark =
+      document.body.classList.contains("dark");
+
+
+    localStorage.setItem(
+      "naim-theme",
+      isDark ? "dark" : "light"
+    );
+
+
+    if (themeIcon) {
+
+      themeIcon.textContent =
+        isDark ? "☀" : "☾";
+
     }
 
-    if (toggle) {
-      toggle.setAttribute("aria-expanded", "false");
-    }
   });
-});
+
+}
 
 
-/* ========================================
-   PHOTO SLIDER
-   ======================================== */
-
-const galleryTrack = document.querySelector(".gallery-track");
-const gallerySlides = document.querySelectorAll(".gallery-slide");
-const galleryNext = document.querySelector(".gallery-next");
-const galleryPrev = document.querySelector(".gallery-prev");
-const galleryDots = document.querySelectorAll(".gallery-dot");
-const galleryCurrent = document.getElementById("galleryCurrent");
-
-let galleryIndex = 0;
-let galleryTimer;
+/* =========================================================
+   IMAGE SLIDER
+   ========================================================= */
 
 
-/* Show selected image */
+/*
+   IMAGE SLIDER SETTINGS
 
-function showGallerySlide(index) {
+   Change this number if you want the images
+   to stay longer.
 
-  if (!galleryTrack || gallerySlides.length === 0) {
+   7000 = 7 seconds
+   8000 = 8 seconds
+   10000 = 10 seconds
+
+   I have set it to 7 seconds.
+*/
+
+const SLIDE_TIME = 7000;
+
+
+const slides =
+  document.querySelectorAll(".slide");
+
+const slider =
+  document.getElementById("imageSlider");
+
+const nextButton =
+  document.getElementById("nextSlide");
+
+const prevButton =
+  document.getElementById("prevSlide");
+
+const dotsContainer =
+  document.getElementById("sliderDots");
+
+const currentSlideText =
+  document.getElementById("currentSlide");
+
+const totalSlidesText =
+  document.getElementById("totalSlides");
+
+
+let currentIndex = 0;
+
+let slideTimer;
+
+
+/* =========================================================
+   CREATE DOTS
+   ========================================================= */
+
+if (slides.length > 0 && dotsContainer) {
+
+  slides.forEach((slide, index) => {
+
+    const dot =
+      document.createElement("button");
+
+    dot.className = "slider-dot";
+
+    dot.setAttribute(
+      "aria-label",
+      `Go to image ${index + 1}`
+    );
+
+
+    dot.addEventListener("click", () => {
+
+      showSlide(index);
+
+      restartSlider();
+
+    });
+
+
+    dotsContainer.appendChild(dot);
+
+  });
+
+}
+
+
+const dots =
+  document.querySelectorAll(".slider-dot");
+
+
+/* =========================================================
+   SHOW SLIDE
+   ========================================================= */
+
+function showSlide(index) {
+
+  if (slides.length === 0) {
     return;
   }
 
-  /* Keep index inside range */
 
-  if (index >= gallerySlides.length) {
-    galleryIndex = 0;
-  } else if (index < 0) {
-    galleryIndex = gallerySlides.length - 1;
-  } else {
-    galleryIndex = index;
+  /*
+     Loop around automatically.
+  */
+
+  if (index >= slides.length) {
+
+    index = 0;
+
+  }
+
+  if (index < 0) {
+
+    index = slides.length - 1;
+
   }
 
 
-  /* Move slider */
-
-  galleryTrack.style.transform =
-    `translateX(-${galleryIndex * 100}%)`;
+  currentIndex = index;
 
 
-  /* Update dots */
+  /* Remove active */
 
-  galleryDots.forEach((dot, index) => {
+  slides.forEach(slide => {
 
-    dot.classList.toggle(
-      "active",
-      index === galleryIndex
+    slide.classList.remove("active");
+
+  });
+
+
+  dots.forEach(dot => {
+
+    dot.classList.remove("active");
+
+  });
+
+
+  /* Activate selected */
+
+  slides[currentIndex]
+    .classList.add("active");
+
+
+  if (dots[currentIndex]) {
+
+    dots[currentIndex]
+      .classList.add("active");
+
+  }
+
+
+  /* Counter */
+
+  if (currentSlideText) {
+
+    currentSlideText.textContent =
+      String(currentIndex + 1)
+        .padStart(2, "0");
+
+  }
+
+
+  if (totalSlidesText) {
+
+    totalSlidesText.textContent =
+      String(slides.length)
+        .padStart(2, "0");
+
+  }
+
+}
+
+
+/* =========================================================
+   NEXT
+   ========================================================= */
+
+function nextSlide() {
+
+  showSlide(currentIndex + 1);
+
+}
+
+
+/* =========================================================
+   PREVIOUS
+   ========================================================= */
+
+function previousSlide() {
+
+  showSlide(currentIndex - 1);
+
+}
+
+
+/* =========================================================
+   BUTTON EVENTS
+   ========================================================= */
+
+if (nextButton) {
+
+  nextButton.addEventListener(
+    "click",
+    () => {
+
+      nextSlide();
+
+      restartSlider();
+
+    }
+  );
+
+}
+
+
+if (prevButton) {
+
+  prevButton.addEventListener(
+    "click",
+    () => {
+
+      previousSlide();
+
+      restartSlider();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   AUTOMATIC SLIDER
+   ========================================================= */
+
+function startSlider() {
+
+  /*
+     7 seconds per image.
+  */
+
+  slideTimer =
+    setInterval(
+      nextSlide,
+      SLIDE_TIME
     );
 
-  });
+}
 
 
-  /* Update counter */
+function stopSlider() {
 
-  if (galleryCurrent) {
-
-    galleryCurrent.textContent =
-      String(galleryIndex + 1).padStart(2, "0");
-
-  }
+  clearInterval(slideTimer);
 
 }
 
 
-/* Next image */
+function restartSlider() {
 
-if (galleryNext) {
+  stopSlider();
 
-  galleryNext.addEventListener("click", () => {
-
-    showGallerySlide(galleryIndex + 1);
-
-    restartGalleryTimer();
-
-  });
+  startSlider();
 
 }
 
 
-/* Previous image */
+/* =========================================================
+   PAUSE WHEN MOUSE IS OVER IMAGE
+   ========================================================= */
 
-if (galleryPrev) {
+if (slider) {
 
-  galleryPrev.addEventListener("click", () => {
-
-    showGallerySlide(galleryIndex - 1);
-
-    restartGalleryTimer();
-
-  });
-
-}
+  slider.addEventListener(
+    "mouseenter",
+    stopSlider
+  );
 
 
-/* Dot navigation */
-
-galleryDots.forEach((dot, index) => {
-
-  dot.addEventListener("click", () => {
-
-    showGallerySlide(index);
-
-    restartGalleryTimer();
-
-  });
-
-});
-
-
-/* ========================================
-   AUTOMATIC SLIDESHOW
-   ======================================== */
-
-function startGalleryTimer() {
-
-  galleryTimer = setInterval(() => {
-
-    showGallerySlide(galleryIndex + 1);
-
-  }, 5000);
+  slider.addEventListener(
+    "mouseleave",
+    startSlider
+  );
 
 }
 
 
-function restartGalleryTimer() {
-
-  clearInterval(galleryTimer);
-
-  startGalleryTimer();
-
-}
-
-
-/* Start slider */
-
-if (gallerySlides.length > 1) {
-
-  showGallerySlide(0);
-
-  startGalleryTimer();
-
-}
-
-
-/* ========================================
-   SWIPE SUPPORT FOR MOBILE
-   ======================================== */
+/* =========================================================
+   TOUCH / SWIPE SUPPORT
+   ========================================================= */
 
 let touchStartX = 0;
+
 let touchEndX = 0;
 
-if (galleryTrack) {
 
-  galleryTrack.addEventListener(
+if (slider) {
+
+  slider.addEventListener(
     "touchstart",
-    (event) => {
+    event => {
 
       touchStartX =
         event.changedTouches[0].screenX;
@@ -190,14 +417,15 @@ if (galleryTrack) {
   );
 
 
-  galleryTrack.addEventListener(
+  slider.addEventListener(
     "touchend",
-    (event) => {
+    event => {
 
       touchEndX =
         event.changedTouches[0].screenX;
 
-      handleGallerySwipe();
+
+      handleSwipe();
 
     },
     { passive: true }
@@ -206,46 +434,96 @@ if (galleryTrack) {
 }
 
 
-function handleGallerySwipe() {
+function handleSwipe() {
 
-  const swipeDistance =
-    touchEndX - touchStartX;
+  const distance =
+    touchStartX - touchEndX;
 
 
-  /* Swipe left = next */
+  /*
+     Swipe left = next
+     Swipe right = previous
+  */
 
-  if (swipeDistance < -50) {
+  if (Math.abs(distance) < 50) {
 
-    showGallerySlide(galleryIndex + 1);
+    return;
 
-    restartGalleryTimer();
+  }
+
+
+  if (distance > 0) {
+
+    nextSlide();
+
+  } else {
+
+    previousSlide();
 
   }
 
 
-  /* Swipe right = previous */
-
-  if (swipeDistance > 50) {
-
-    showGallerySlide(galleryIndex - 1);
-
-    restartGalleryTimer();
-
-  }
+  restartSlider();
 
 }
 
 
-/* ========================================
-   CURRENT YEAR
-   ======================================== */
+/* =========================================================
+   KEYBOARD SUPPORT
+   ========================================================= */
 
-const yearElement =
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "ArrowRight"
+    ) {
+
+      nextSlide();
+
+      restartSlider();
+
+    }
+
+
+    if (
+      event.key === "ArrowLeft"
+    ) {
+
+      previousSlide();
+
+      restartSlider();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INITIALIZE SLIDER
+   ========================================================= */
+
+if (slides.length > 0) {
+
+  showSlide(0);
+
+  startSlider();
+
+}
+
+
+/* =========================================================
+   CURRENT YEAR
+   ========================================================= */
+
+const year =
   document.getElementById("year");
 
-if (yearElement) {
+if (year) {
 
-  yearElement.textContent =
+  year.textContent =
     new Date().getFullYear();
 
 }
