@@ -1,143 +1,114 @@
-/* =========================================================
+/* =========================================
    MOBILE MENU
-   ========================================================= */
+========================================= */
 
 const toggle = document.querySelector(".menu-toggle");
 const links = document.querySelector(".nav-links");
 
 if (toggle && links) {
-
   toggle.addEventListener("click", () => {
-
     const open = links.classList.toggle("open");
 
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
     toggle.setAttribute(
-      "aria-expanded",
-      open ? "true" : "false"
+      "aria-label",
+      open ? "Close navigation menu" : "Open navigation menu"
     );
-
   });
-
 
   document.querySelectorAll(".nav-links a").forEach((link) => {
-
     link.addEventListener("click", () => {
-
       links.classList.remove("open");
-
-      toggle.setAttribute(
-        "aria-expanded",
-        "false"
-      );
-
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open navigation menu");
     });
-
   });
-
 }
 
 
-/* =========================================================
+/* =========================================
    DARK MODE
-   ========================================================= */
+========================================= */
 
-const themeToggle =
-  document.querySelector(".theme-toggle");
+const themeToggle = document.querySelector(".theme-toggle");
 
 if (themeToggle) {
-
-  const savedTheme =
-    localStorage.getItem("theme");
+  const savedTheme = localStorage.getItem("theme");
 
   if (savedTheme === "dark") {
     document.body.classList.add("dark-mode");
   }
 
+  updateThemeButton();
 
   themeToggle.addEventListener("click", () => {
-
     document.body.classList.toggle("dark-mode");
 
-    const isDark =
-      document.body.classList.contains("dark-mode");
+    const isDark = document.body.classList.contains("dark-mode");
 
-    localStorage.setItem(
-      "theme",
-      isDark ? "dark" : "light"
-    );
+    localStorage.setItem("theme", isDark ? "dark" : "light");
 
+    updateThemeButton();
   });
+}
 
+function updateThemeButton() {
+  const isDark = document.body.classList.contains("dark-mode");
+
+  if (themeToggle) {
+    themeToggle.textContent = isDark ? "☀" : "◐";
+    themeToggle.setAttribute(
+      "aria-label",
+      isDark ? "Switch to light mode" : "Switch to dark mode"
+    );
+  }
 }
 
 
-/* =========================================================
-   PORTFOLIO IMAGE SLIDER
+/* =========================================
+   PROFESSIONAL IMAGE SLIDER
    NAIM-2 → NAIM-5
-   ========================================================= */
+========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const slider =
-    document.querySelector(".portfolio-slider");
+  const slider = document.querySelector(".portfolio-slider");
 
   if (!slider) return;
 
+  const slides = Array.from(
+    slider.querySelectorAll(".portfolio-slide")
+  );
 
-  const slides =
-    slider.querySelectorAll(".portfolio-slide");
+  const dots = Array.from(
+    slider.querySelectorAll(".slider-dot")
+  );
 
-  const track =
-    slider.querySelector(".portfolio-slides");
+  const previousButton = slider.querySelector(".slider-prev");
+  const nextButton = slider.querySelector(".slider-next");
+  const counter = slider.querySelector(".slider-counter");
 
-  const previousButton =
-    slider.querySelector(".slider-prev");
-
-  const nextButton =
-    slider.querySelector(".slider-next");
-
-  const dots =
-    slider.querySelectorAll(".slider-dot");
-
-
-  if (
-    !track ||
-    slides.length === 0
-  ) {
-    return;
-  }
-
+  if (!slides.length) return;
 
   let currentSlide = 0;
-
   let autoSlide;
 
 
-  /* -------------------------------------------------------
-     SHOW SLIDE
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   SHOW SLIDE
+----------------------------------------- */
 
   function showSlide(index) {
 
     if (index < 0) {
-
       index = slides.length - 1;
-
     }
-
 
     if (index >= slides.length) {
-
       index = 0;
-
     }
 
-
     currentSlide = index;
-
-
-    track.style.transform =
-      `translateX(-${currentSlide * 100}%)`;
 
 
     slides.forEach((slide, i) => {
@@ -145,6 +116,11 @@ document.addEventListener("DOMContentLoaded", () => {
       slide.classList.toggle(
         "active",
         i === currentSlide
+      );
+
+      slide.setAttribute(
+        "aria-hidden",
+        i === currentSlide ? "false" : "true"
       );
 
     });
@@ -157,40 +133,47 @@ document.addEventListener("DOMContentLoaded", () => {
         i === currentSlide
       );
 
+      dot.setAttribute(
+        "aria-current",
+        i === currentSlide ? "true" : "false"
+      );
+
     });
 
+
+    if (counter) {
+
+      counter.textContent =
+        String(currentSlide + 1).padStart(2, "0") +
+        " / " +
+        String(slides.length).padStart(2, "0");
+
+    }
+
   }
 
 
-  /* -------------------------------------------------------
-     NEXT
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   NEXT
+----------------------------------------- */
 
   function nextSlide() {
-
-    showSlide(
-      currentSlide + 1
-    );
-
+    showSlide(currentSlide + 1);
   }
 
 
-  /* -------------------------------------------------------
-     PREVIOUS
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   PREVIOUS
+----------------------------------------- */
 
   function previousSlide() {
-
-    showSlide(
-      currentSlide - 1
-    );
-
+    showSlide(currentSlide - 1);
   }
 
 
-  /* -------------------------------------------------------
-     BUTTONS
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   BUTTONS
+----------------------------------------- */
 
   if (nextButton) {
 
@@ -224,9 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* -------------------------------------------------------
-     DOTS
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   DOTS
+----------------------------------------- */
 
   dots.forEach((dot, index) => {
 
@@ -244,11 +227,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* -------------------------------------------------------
-     AUTOMATIC SLIDE
-     
-     8 SECONDS PER IMAGE
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   AUTOMATIC SLIDE
+   7 SECONDS PER IMAGE
+----------------------------------------- */
 
   function startAutoSlide() {
 
@@ -258,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nextSlide();
 
       },
-      8000
+      7000
     );
 
   }
@@ -273,9 +255,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* -------------------------------------------------------
-     PAUSE WHILE MOUSE IS OVER SLIDER
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   PAUSE WHEN MOUSE IS OVER SLIDER
+----------------------------------------- */
 
   slider.addEventListener(
     "mouseenter",
@@ -297,12 +279,11 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
-  /* -------------------------------------------------------
-     TOUCH / SWIPE
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   TOUCH / SWIPE SUPPORT
+----------------------------------------- */
 
   let touchStartX = 0;
-
   let touchEndX = 0;
 
 
@@ -313,12 +294,8 @@ document.addEventListener("DOMContentLoaded", () => {
       touchStartX =
         event.changedTouches[0].screenX;
 
-      clearInterval(autoSlide);
-
     },
-    {
-      passive: true
-    }
+    { passive: true }
   );
 
 
@@ -329,38 +306,71 @@ document.addEventListener("DOMContentLoaded", () => {
       touchEndX =
         event.changedTouches[0].screenX;
 
+      handleSwipe();
 
-      const distance =
-        touchEndX - touchStartX;
+    },
+    { passive: true }
+  );
 
 
-      if (Math.abs(distance) > 50) {
+  function handleSwipe() {
 
-        if (distance < 0) {
+    const distance =
+      touchStartX - touchEndX;
 
-          nextSlide();
+    if (Math.abs(distance) < 50) {
+      return;
+    }
 
-        } else {
+    if (distance > 0) {
 
-          previousSlide();
+      nextSlide();
 
-        }
+    } else {
+
+      previousSlide();
+
+    }
+
+    restartAutoSlide();
+
+  }
+
+
+/* -----------------------------------------
+   KEYBOARD SUPPORT
+----------------------------------------- */
+
+  slider.setAttribute("tabindex", "0");
+
+
+  slider.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (event.key === "ArrowRight") {
+
+        nextSlide();
+
+        restartAutoSlide();
 
       }
 
+      if (event.key === "ArrowLeft") {
 
-      restartAutoSlide();
+        previousSlide();
 
-    },
-    {
-      passive: true
+        restartAutoSlide();
+
+      }
+
     }
   );
 
 
-  /* -------------------------------------------------------
-     INITIALIZE
-  ------------------------------------------------------- */
+/* -----------------------------------------
+   INITIAL SLIDE
+----------------------------------------- */
 
   showSlide(0);
 
@@ -369,16 +379,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-/* =========================================================
-   FOOTER YEAR
-   ========================================================= */
+/* =========================================
+   CURRENT YEAR
+========================================= */
 
-const year =
+const yearElement =
   document.getElementById("year");
 
-if (year) {
+if (yearElement) {
 
-  year.textContent =
+  yearElement.textContent =
     new Date().getFullYear();
 
 }
