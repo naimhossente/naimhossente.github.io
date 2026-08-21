@@ -1,451 +1,271 @@
 /* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
+   MOBILE MENU
+   ========================================================= */
 
-const toggle =
-  document.querySelector(".menu-toggle");
-
-const links =
-  document.querySelector(".nav-links");
-
+const toggle = document.querySelector(".menu-toggle");
+const links = document.querySelector(".nav-links");
 
 if (toggle && links) {
-
   toggle.addEventListener("click", () => {
-
-    const isOpen =
-      links.classList.toggle("open");
+    const open = links.classList.toggle("open");
 
     toggle.setAttribute(
       "aria-expanded",
-      String(isOpen)
+      open ? "true" : "false"
     );
+  });
+
+  document.querySelectorAll(".nav-links a").forEach((a) => {
+    a.addEventListener("click", () => {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
+
+/* =========================================================
+   IMAGE SLIDER
+   Naim-2 → Naim-3 → Naim-4 → Naim-5
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const slider =
+    document.querySelector(".slider") ||
+    document.querySelector(".gallery-slider");
+
+  if (!slider) return;
+
+  const track =
+    slider.querySelector(".slides") ||
+    slider.querySelector(".gallery-slides");
+
+  const slides =
+    slider.querySelectorAll(".slide").length
+      ? slider.querySelectorAll(".slide")
+      : slider.querySelectorAll(".gallery-slide");
+
+  if (!track || slides.length === 0) return;
+
+  const prev =
+    slider.querySelector(".prev") ||
+    slider.querySelector(".gallery-prev");
+
+  const next =
+    slider.querySelector(".next") ||
+    slider.querySelector(".gallery-next");
+
+  const dotsContainer =
+    slider.querySelector(".slider-dots") ||
+    slider.querySelector(".gallery-dots");
+
+  let current = 0;
+
+  /* -------------------------------------------------------
+     Create dots
+     ------------------------------------------------------- */
+
+  let dots = [];
+
+  if (dotsContainer) {
+
+    dotsContainer.innerHTML = "";
+
+    slides.forEach((_, index) => {
+
+      const dot = document.createElement("button");
+
+      dot.type = "button";
+
+      dot.setAttribute(
+        "aria-label",
+        `Show image ${index + 1}`
+      );
+
+      dot.addEventListener("click", () => {
+        goToSlide(index);
+        restartAutoSlide();
+      });
+
+      dotsContainer.appendChild(dot);
+
+      dots.push(dot);
+    });
+  }
+
+
+  /* -------------------------------------------------------
+     Change slide
+     ------------------------------------------------------- */
+
+  function goToSlide(index) {
+
+    if (index < 0) {
+      index = slides.length - 1;
+    }
+
+    if (index >= slides.length) {
+      index = 0;
+    }
+
+    current = index;
+
+    track.style.transform =
+      `translateX(-${current * 100}%)`;
+
+    dots.forEach((dot, i) => {
+
+      dot.classList.toggle(
+        "active",
+        i === current
+      );
+
+    });
+  }
+
+
+  /* -------------------------------------------------------
+     Previous
+     ------------------------------------------------------- */
+
+  if (prev) {
+
+    prev.addEventListener("click", () => {
+
+      goToSlide(current - 1);
+
+      restartAutoSlide();
+
+    });
+
+  }
+
+
+  /* -------------------------------------------------------
+     Next
+     ------------------------------------------------------- */
+
+  if (next) {
+
+    next.addEventListener("click", () => {
+
+      goToSlide(current + 1);
+
+      restartAutoSlide();
+
+    });
+
+  }
+
+
+  /* -------------------------------------------------------
+     Automatic slideshow
+     
+     7 seconds per image
+     ------------------------------------------------------- */
+
+  let autoSlide = setInterval(() => {
+
+    goToSlide(current + 1);
+
+  }, 7000);
+
+
+  function restartAutoSlide() {
+
+    clearInterval(autoSlide);
+
+    autoSlide = setInterval(() => {
+
+      goToSlide(current + 1);
+
+    }, 7000);
+
+  }
+
+
+  /* -------------------------------------------------------
+     Pause when mouse is over gallery
+     ------------------------------------------------------- */
+
+  slider.addEventListener("mouseenter", () => {
+
+    clearInterval(autoSlide);
 
   });
 
 
-  document
-    .querySelectorAll(".nav-links a")
-    .forEach((link) => {
+  slider.addEventListener("mouseleave", () => {
 
-      link.addEventListener("click", () => {
+    restartAutoSlide();
 
-        links.classList.remove("open");
+  });
 
-        toggle.setAttribute(
-          "aria-expanded",
-          "false"
-        );
 
-      });
+  /* -------------------------------------------------------
+     Touch/swipe support for phones
+     ------------------------------------------------------- */
 
-    });
-
-}
-
-
-/* =========================================================
-   DARK / LIGHT MODE
-========================================================= */
-
-const themeToggle =
-  document.querySelector(".theme-toggle");
-
-
-const savedTheme =
-  localStorage.getItem("naim-theme");
-
-
-if (savedTheme === "dark") {
-
-  document.body.classList.add(
-    "dark-mode"
-  );
-
-}
-
-
-function updateThemeButton() {
-
-  if (!themeToggle) return;
-
-
-  const dark =
-    document.body.classList.contains(
-      "dark-mode"
-    );
-
-
-  themeToggle.textContent =
-    dark ? "☀" : "◐";
-
-  themeToggle.setAttribute(
-    "aria-label",
-    dark
-      ? "Switch to light mode"
-      : "Switch to dark mode"
-  );
-
-}
-
-
-if (themeToggle) {
-
-  themeToggle.addEventListener(
-    "click",
-    () => {
-
-      const dark =
-        document.body.classList.toggle(
-          "dark-mode"
-        );
-
-
-      localStorage.setItem(
-        "naim-theme",
-        dark ? "dark" : "light"
-      );
-
-
-      updateThemeButton();
-
-    }
-  );
-
-}
-
-
-updateThemeButton();
-
-
-/* =========================================================
-   PORTFOLIO SLIDER
-   NAIM-2 → NAIM-5
-========================================================= */
-
-const slides =
-  document.querySelectorAll(
-    ".portfolio-slide"
-  );
-
-
-const dots =
-  document.querySelectorAll(
-    ".slider-dot"
-  );
-
-
-const previousButton =
-  document.querySelector(
-    ".slider-prev"
-  );
-
-
-const nextButton =
-  document.querySelector(
-    ".slider-next"
-  );
-
-
-const counter =
-  document.querySelector(
-    ".slider-counter"
-  );
-
-
-const slider =
-  document.querySelector(
-    ".portfolio-slider"
-  );
-
-
-let currentSlide = 0;
-
-
-/*
-   8 seconds per image.
-   Change 8000 to 10000 if you want
-   10 seconds per image.
-*/
-
-const SLIDE_TIME = 8000;
-
-let sliderTimer;
-
-
-/* =========================================================
-   SHOW SLIDE
-========================================================= */
-
-function showSlide(index) {
-
-  if (!slides.length) {
-    return;
-  }
-
-
-  if (index >= slides.length) {
-
-    currentSlide = 0;
-
-  }
-
-  else if (index < 0) {
-
-    currentSlide =
-      slides.length - 1;
-
-  }
-
-  else {
-
-    currentSlide = index;
-
-  }
-
-
-  slides.forEach(
-    (slide, index) => {
-
-      slide.classList.toggle(
-        "active",
-        index === currentSlide
-      );
-
-    }
-  );
-
-
-  dots.forEach(
-    (dot, index) => {
-
-      dot.classList.toggle(
-        "active",
-        index === currentSlide
-      );
-
-    }
-  );
-
-
-  if (counter) {
-
-    const number =
-      String(currentSlide + 1)
-        .padStart(2, "0");
-
-
-    const total =
-      String(slides.length)
-        .padStart(2, "0");
-
-
-    counter.textContent =
-      `${number} / ${total}`;
-
-  }
-
-}
-
-
-/* =========================================================
-   NEXT / PREVIOUS
-========================================================= */
-
-function nextSlide() {
-
-  showSlide(
-    currentSlide + 1
-  );
-
-}
-
-
-function previousSlide() {
-
-  showSlide(
-    currentSlide - 1
-  );
-
-}
-
-
-/* =========================================================
-   START AUTOMATIC SLIDER
-========================================================= */
-
-function startSlider() {
-
-  clearInterval(
-    sliderTimer
-  );
-
-
-  if (!slides.length) {
-    return;
-  }
-
-
-  sliderTimer =
-    setInterval(
-      nextSlide,
-      SLIDE_TIME
-    );
-
-}
-
-
-/* =========================================================
-   RESTART TIMER
-========================================================= */
-
-function restartSlider() {
-
-  startSlider();
-
-}
-
-
-/* =========================================================
-   NEXT BUTTON
-========================================================= */
-
-if (nextButton) {
-
-  nextButton.addEventListener(
-    "click",
-    () => {
-
-      nextSlide();
-
-      restartSlider();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   PREVIOUS BUTTON
-========================================================= */
-
-if (previousButton) {
-
-  previousButton.addEventListener(
-    "click",
-    () => {
-
-      previousSlide();
-
-      restartSlider();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   DOT BUTTONS
-========================================================= */
-
-dots.forEach(
-  (dot, index) => {
-
-    dot.addEventListener(
-      "click",
-      () => {
-
-        showSlide(index);
-
-        restartSlider();
-
-      }
-    );
-
-  }
-);
-
-
-/* =========================================================
-   PAUSE WHEN MOUSE IS OVER GALLERY
-========================================================= */
-
-if (slider) {
-
-  slider.addEventListener(
-    "mouseenter",
-    () => {
-
-      clearInterval(
-        sliderTimer
-      );
-
-    }
-  );
-
-
-  slider.addEventListener(
-    "mouseleave",
-    () => {
-
-      startSlider();
-
-    }
-  );
-
+  let touchStartX = 0;
+  let touchEndX = 0;
 
   slider.addEventListener(
     "touchstart",
-    () => {
+    (event) => {
 
-      clearInterval(
-        sliderTimer
-      );
+      touchStartX =
+        event.changedTouches[0].screenX;
 
     },
-    {
-      passive: true
-    }
+    { passive: true }
   );
 
 
   slider.addEventListener(
     "touchend",
-    () => {
+    (event) => {
 
-      startSlider();
+      touchEndX =
+        event.changedTouches[0].screenX;
+
+      const distance =
+        touchEndX - touchStartX;
+
+      if (Math.abs(distance) < 50) return;
+
+      if (distance < 0) {
+
+        goToSlide(current + 1);
+
+      } else {
+
+        goToSlide(current - 1);
+
+      }
+
+      restartAutoSlide();
 
     },
-    {
-      passive: true
-    }
+    { passive: true }
   );
 
-}
+
+  /* -------------------------------------------------------
+     Start at first image
+     ------------------------------------------------------- */
+
+  goToSlide(0);
+
+});
 
 
 /* =========================================================
-   INITIALIZE SLIDER
-========================================================= */
+   FOOTER YEAR
+   ========================================================= */
 
-showSlide(0);
-
-startSlider();
-
-
-/* =========================================================
-   CURRENT YEAR
-========================================================= */
-
-const year =
-  document.getElementById("year");
-
+const year = document.getElementById("year");
 
 if (year) {
-
-  year.textContent =
-    new Date().getFullYear();
-
+  year.textContent = new Date().getFullYear();
 }
