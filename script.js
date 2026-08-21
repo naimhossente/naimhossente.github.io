@@ -2,122 +2,312 @@
    MOBILE NAVIGATION
 ========================================================= */
 
-const toggle = document.querySelector(".menu-toggle");
-const links = document.querySelector(".nav-links");
+const toggle =
+  document.querySelector(".menu-toggle");
+
+const links =
+  document.querySelector(".nav-links");
+
 
 if (toggle && links) {
 
   toggle.addEventListener("click", () => {
 
-    const open = links.classList.toggle("open");
+    const isOpen =
+      links.classList.toggle("open");
 
     toggle.setAttribute(
       "aria-expanded",
-      String(open)
+      String(isOpen)
     );
 
   });
 
 
-  document.querySelectorAll(".nav-links a").forEach((link) => {
+  document
+    .querySelectorAll(".nav-links a")
+    .forEach((link) => {
 
-    link.addEventListener("click", () => {
+      link.addEventListener("click", () => {
 
-      links.classList.remove("open");
+        links.classList.remove("open");
 
-      toggle.setAttribute(
-        "aria-expanded",
-        "false"
-      );
+        toggle.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+      });
 
     });
-
-  });
 
 }
 
 
 /* =========================================================
-   PORTFOLIO IMAGE SLIDER
-   Naim-2 → Naim-5
+   DARK / LIGHT MODE
 ========================================================= */
 
-const slides = document.querySelectorAll(".portfolio-slide");
-const dots = document.querySelectorAll(".slider-dot");
+const themeToggle =
+  document.querySelector(".theme-toggle");
+
+
+const savedTheme =
+  localStorage.getItem("naim-theme");
+
+
+if (savedTheme === "dark") {
+
+  document.body.classList.add(
+    "dark-mode"
+  );
+
+}
+
+
+function updateThemeButton() {
+
+  if (!themeToggle) return;
+
+
+  const dark =
+    document.body.classList.contains(
+      "dark-mode"
+    );
+
+
+  themeToggle.textContent =
+    dark ? "☀" : "◐";
+
+  themeToggle.setAttribute(
+    "aria-label",
+    dark
+      ? "Switch to light mode"
+      : "Switch to dark mode"
+  );
+
+}
+
+
+if (themeToggle) {
+
+  themeToggle.addEventListener(
+    "click",
+    () => {
+
+      const dark =
+        document.body.classList.toggle(
+          "dark-mode"
+        );
+
+
+      localStorage.setItem(
+        "naim-theme",
+        dark ? "dark" : "light"
+      );
+
+
+      updateThemeButton();
+
+    }
+  );
+
+}
+
+
+updateThemeButton();
+
+
+/* =========================================================
+   PORTFOLIO SLIDER
+   NAIM-2 → NAIM-5
+========================================================= */
+
+const slides =
+  document.querySelectorAll(
+    ".portfolio-slide"
+  );
+
+
+const dots =
+  document.querySelectorAll(
+    ".slider-dot"
+  );
+
 
 const previousButton =
-  document.querySelector(".slider-prev");
+  document.querySelector(
+    ".slider-prev"
+  );
+
 
 const nextButton =
-  document.querySelector(".slider-next");
+  document.querySelector(
+    ".slider-next"
+  );
+
+
+const counter =
+  document.querySelector(
+    ".slider-counter"
+  );
+
+
+const slider =
+  document.querySelector(
+    ".portfolio-slider"
+  );
+
 
 let currentSlide = 0;
+
+
+/*
+   8 seconds per image.
+   Change 8000 to 10000 if you want
+   10 seconds per image.
+*/
+
+const SLIDE_TIME = 8000;
 
 let sliderTimer;
 
 
-/* Show selected slide */
+/* =========================================================
+   SHOW SLIDE
+========================================================= */
 
 function showSlide(index) {
 
-  if (!slides.length) return;
+  if (!slides.length) {
+    return;
+  }
 
 
   if (index >= slides.length) {
+
     currentSlide = 0;
+
   }
 
   else if (index < 0) {
-    currentSlide = slides.length - 1;
+
+    currentSlide =
+      slides.length - 1;
+
   }
 
   else {
+
     currentSlide = index;
+
   }
 
 
-  slides.forEach((slide, index) => {
+  slides.forEach(
+    (slide, index) => {
 
-    slide.classList.toggle(
-      "active",
-      index === currentSlide
-    );
+      slide.classList.toggle(
+        "active",
+        index === currentSlide
+      );
 
-  });
-
-
-  dots.forEach((dot, index) => {
-
-    dot.classList.toggle(
-      "active",
-      index === currentSlide
-    );
-
-  });
-
-}
+    }
+  );
 
 
-/* Next image */
+  dots.forEach(
+    (dot, index) => {
 
-function nextSlide() {
+      dot.classList.toggle(
+        "active",
+        index === currentSlide
+      );
 
-  showSlide(currentSlide + 1);
+    }
+  );
 
-}
+
+  if (counter) {
+
+    const number =
+      String(currentSlide + 1)
+        .padStart(2, "0");
 
 
-/* Previous image */
+    const total =
+      String(slides.length)
+        .padStart(2, "0");
 
-function previousSlide() {
 
-  showSlide(currentSlide - 1);
+    counter.textContent =
+      `${number} / ${total}`;
+
+  }
 
 }
 
 
 /* =========================================================
-   BUTTONS
+   NEXT / PREVIOUS
+========================================================= */
+
+function nextSlide() {
+
+  showSlide(
+    currentSlide + 1
+  );
+
+}
+
+
+function previousSlide() {
+
+  showSlide(
+    currentSlide - 1
+  );
+
+}
+
+
+/* =========================================================
+   START AUTOMATIC SLIDER
+========================================================= */
+
+function startSlider() {
+
+  clearInterval(
+    sliderTimer
+  );
+
+
+  if (!slides.length) {
+    return;
+  }
+
+
+  sliderTimer =
+    setInterval(
+      nextSlide,
+      SLIDE_TIME
+    );
+
+}
+
+
+/* =========================================================
+   RESTART TIMER
+========================================================= */
+
+function restartSlider() {
+
+  startSlider();
+
+}
+
+
+/* =========================================================
+   NEXT BUTTON
 ========================================================= */
 
 if (nextButton) {
@@ -136,6 +326,10 @@ if (nextButton) {
 }
 
 
+/* =========================================================
+   PREVIOUS BUTTON
+========================================================= */
+
 if (previousButton) {
 
   previousButton.addEventListener(
@@ -153,85 +347,88 @@ if (previousButton) {
 
 
 /* =========================================================
-   DOT NAVIGATION
+   DOT BUTTONS
 ========================================================= */
 
-dots.forEach((dot, index) => {
+dots.forEach(
+  (dot, index) => {
 
-  dot.addEventListener("click", () => {
+    dot.addEventListener(
+      "click",
+      () => {
 
-    showSlide(index);
+        showSlide(index);
 
-    restartSlider();
+        restartSlider();
 
-  });
+      }
+    );
 
-});
+  }
+);
 
 
 /* =========================================================
-   AUTOMATIC SLIDER
-   7 SECONDS PER IMAGE
+   PAUSE WHEN MOUSE IS OVER GALLERY
 ========================================================= */
-
-function startSlider() {
-
-  clearInterval(sliderTimer);
-
-  sliderTimer = setInterval(
-    nextSlide,
-    7000
-  );
-
-}
-
-
-function restartSlider() {
-
-  startSlider();
-
-}
-
-
-/* =========================================================
-   PAUSE SLIDER WHEN USER IS LOOKING AT IT
-========================================================= */
-
-const slider =
-  document.querySelector(".portfolio-slider");
-
 
 if (slider) {
 
   slider.addEventListener(
     "mouseenter",
-    () => clearInterval(sliderTimer)
+    () => {
+
+      clearInterval(
+        sliderTimer
+      );
+
+    }
   );
 
 
   slider.addEventListener(
     "mouseleave",
-    () => startSlider()
+    () => {
+
+      startSlider();
+
+    }
   );
 
 
   slider.addEventListener(
     "touchstart",
-    () => clearInterval(sliderTimer),
-    { passive: true }
+    () => {
+
+      clearInterval(
+        sliderTimer
+      );
+
+    },
+    {
+      passive: true
+    }
   );
 
 
   slider.addEventListener(
     "touchend",
-    () => startSlider(),
-    { passive: true }
+    () => {
+
+      startSlider();
+
+    },
+    {
+      passive: true
+    }
   );
 
 }
 
 
-/* Start */
+/* =========================================================
+   INITIALIZE SLIDER
+========================================================= */
 
 showSlide(0);
 
@@ -242,12 +439,13 @@ startSlider();
    CURRENT YEAR
 ========================================================= */
 
-const yearElement =
+const year =
   document.getElementById("year");
 
-if (yearElement) {
 
-  yearElement.textContent =
+if (year) {
+
+  year.textContent =
     new Date().getFullYear();
 
 }
